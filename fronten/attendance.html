@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XYZ AI - Attendance</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6fb;
+    color:#111827;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:240px;
+    height:100vh;
+    background:#111827;
+    color:white;
+    padding:25px 15px;
+}
+
+.logo{
+    text-align:center;
+    font-size:25px;
+    font-weight:bold;
+    margin-bottom:35px;
+}
+
+.logo span{
+    color:#f97316;
+}
+
+.menu{
+    padding:14px 15px;
+    margin-bottom:8px;
+    border-radius:10px;
+    color:#d1d5db;
+    cursor:pointer;
+}
+
+.menu:hover,
+.menu.active{
+    background:#f97316;
+    color:white;
+}
+
+.main{
+    margin-left:240px;
+    padding:30px;
+}
+
+.header{
+    margin-bottom:25px;
+}
+
+.header h1{
+    color:#172554;
+}
+
+.header p{
+    color:#64748b;
+    margin-top:6px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+    margin-bottom:25px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+    gap:15px;
+    align-items:end;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:7px;
+    font-weight:bold;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    background:white;
+}
+
+button{
+    border:none;
+    border-radius:8px;
+    padding:12px 18px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.add{
+    background:#f97316;
+    color:white;
+}
+
+.table-card{
+    background:white;
+    border-radius:14px;
+    overflow-x:auto;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#172554;
+    color:white;
+    padding:15px;
+    text-align:left;
+}
+
+td{
+    padding:14px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.present{
+    background:#dcfce7;
+    color:#166534;
+    padding:6px 12px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+.absent{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:6px 12px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.stat{
+    background:white;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+}
+
+.stat h3{
+    color:#64748b;
+    font-size:15px;
+}
+
+.stat p{
+    margin-top:8px;
+    font-size:28px;
+    font-weight:bold;
+    color:#172554;
+}
+
+#message{
+    position:fixed;
+    right:25px;
+    top:25px;
+    padding:15px 20px;
+    border-radius:8px;
+    color:white;
+    display:none;
+    font-weight:bold;
+}
+
+.success{
+    background:#16a34a;
+}
+
+.error{
+    background:#dc2626;
+}
+
+@media(max-width:900px){
+
+    .form-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+        XYZ <span>AI</span>
+    </div>
+
+    <div class="menu"
+         onclick="go('principal.html')">
+        📊 Dashboard
+    </div>
+
+    <div class="menu"
+         onclick="go('student.html')">
+        👨‍🎓 Students
+    </div>
+
+    <div class="menu"
+         onclick="go('teacher.html')">
+        👩‍🏫 Teachers
+    </div>
+
+    <div class="menu active">
+        📅 Attendance
+    </div>
+
+    <div class="menu"
+         onclick="go('reports.html')">
+        📑 Reports
+    </div>
+
+</div>
+
+
+<div class="main">
+
+    <div class="header">
+
+        <h1>Attendance Management</h1>
+
+        <p>
+            Record and monitor student attendance
+        </p>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            <h3>Total Records</h3>
+            <p id="totalRecords">0</p>
+        </div>
+
+        <div class="stat">
+            <h3>Present</h3>
+            <p id="presentCount">0</p>
+        </div>
+
+        <div class="stat">
+            <h3>Absent</h3>
+            <p id="absentCount">0</p>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 style="color:#172554;margin-bottom:20px;">
+            Mark Attendance
+        </h2>
+
+        <form id="attendanceForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>Student</label>
+
+                    <select
+                        id="student"
+                        required>
+                        <option value="">
+                            Select Student
+                        </option>
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Date</label>
+
+                    <input
+                        type="date"
+                        id="date"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Status</label>
+
+                    <select
+                        id="status"
+                        required>
+
+                        <option value="present">
+                            Present
+                        </option>
+
+                        <option value="absent">
+                            Absent
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    class="add"
+                    type="submit">
+                    Save Attendance
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Student ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="attendanceTable"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div id="message"></div>
+
+
+<script>
+
+const API =
+    "http://127.0.0.1:8000";
+
+let students = [];
+let attendance = [];
+
+
+function go(page){
+    window.location.href = page;
+}
+
+
+function showMessage(
+    text,
+    type="success"
+){
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+    box.textContent = text;
+
+    box.className = type;
+
+    box.style.display = "block";
+
+    setTimeout(()=>{
+        box.style.display = "none";
+    },2500);
+}
+
+
+function setToday(){
+
+    const today =
+        new Date()
+        .toISOString()
+        .split("T")[0];
+
+    document.getElementById(
+        "date"
+    ).value = today;
+}
+
+
+async function loadStudents(){
+
+    try{
+
+        const response =
+            await fetch(
+                API + "/students"
+            );
+
+        if(!response.ok){
+            throw new Error(
+                "Failed to load students"
+            );
+        }
+
+        students =
+            await response.json();
+
+        const select =
+            document.getElementById(
+                "student"
+            );
+
+        select.innerHTML = `
+            <option value="">
+                Select Student
+            </option>
+        `;
+
+        students.forEach(student => {
+
+            select.innerHTML += `
+
+                <option value="${student.id}">
+                    ${student.name}
+                    -
+                    ${student.class_name || ""}
+                    ${student.section || ""}
+                </option>
+
+            `;
+        });
+
+    }catch(error){
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+async function loadAttendance(){
+
+    try{
+
+        const response =
+            await fetch(
+                API + "/attendance"
+            );
+
+        if(!response.ok){
+            throw new Error(
+                "Failed to load attendance"
+            );
+        }
+
+        attendance =
+            await response.json();
+
+        renderAttendance();
+
+    }catch(error){
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+function renderAttendance(){
+
+    const table =
+        document.getElementById(
+            "attendanceTable"
+        );
+
+    table.innerHTML = "";
+
+    let present = 0;
+    let absent = 0;
+
+
+    if(attendance.length === 0){
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="4"
+                    style="text-align:center;padding:30px">
+                    No attendance records
+                </td>
+            </tr>
+        `;
+
+    }else{
+
+        attendance.forEach(record => {
+
+            if(
+                record.status === "present"
+            ){
+                present++;
+            }else{
+                absent++;
+            }
+
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${record.id}
+                    </td>
+
+                    <td>
+                        ${record.student_id}
+                    </td>
+
+                    <td>
+                        ${record.date}
+                    </td>
+
+                    <td>
+
+                        <span class="${
+                            record.status === "present"
+                            ? "present"
+                            : "absent"
+                        }">
+
+                            ${
+                                record.status
+                                    .toUpperCase()
+                            }
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `;
+        });
+    }
+
+
+    document.getElementById(
+        "totalRecords"
+    ).textContent =
+        attendance.length;
+
+    document.getElementById(
+        "presentCount"
+    ).textContent =
+        present;
+
+    document.getElementById(
+        "absentCount"
+    ).textContent =
+        absent;
+}
+
+
+document.getElementById(
+    "attendanceForm"
+).addEventListener(
+    "submit",
+    async function(e){
+
+        e.preventDefault();
+
+
+        const data = {
+
+            student_id:
+                Number(
+                    document.getElementById(
+                        "student"
+                    ).value
+                ),
+
+            date:
+                document.getElementById(
+                    "date"
+                ).value,
+
+            status:
+                document.getElementById(
+                    "status"
+                ).value
+
+        };
+
+
+        try{
+
+            const response =
+                await fetch(
+                    API + "/attendance",
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if(!response.ok){
+
+                throw new Error(
+                    result.detail ||
+                    "Failed to save attendance"
+                );
+            }
+
+
+            showMessage(
+                "Attendance saved successfully"
+            );
+
+
+            document.getElementById(
+                "student"
+            ).value = "";
+
+            document.getElementById(
+                "status"
+            ).value = "present";
+
+
+            loadAttendance();
+
+            loadStudents();
+
+
+        }catch(error){
+
+            showMessage(
+                error.message,
+                "error"
+            );
+        }
+
+    }
+);
+
+
+setToday();
+
+loadStudents();
+
+loadAttendance();
+
+</script>
+
+</body>
+</html>

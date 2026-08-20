@@ -1,0 +1,2571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>XYZ AI - Principal Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #111827;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #111827;
+            color: white;
+            padding: 25px 15px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .logo span {
+            color: #f97316;
+        }
+
+        .menu {
+            padding: 14px 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #d1d5db;
+        }
+
+        .menu:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .menu.active {
+            background: #f97316;
+            color: white;
+        }
+
+        .logout {
+            margin-top: 30px;
+            background: #dc2626;
+            color: white;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            color: #172554;
+        }
+
+        .header p {
+            margin-top: 6px;
+            color: #64748b;
+        }
+
+        .connection {
+            background: #dcfce7;
+            color: #166534;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* ================= CARDS ================= */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            border-left: 5px solid #f97316;
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: #7c3aed;
+        }
+
+        .stat-card:nth-child(3) {
+            border-left-color: #0891b2;
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: #16a34a;
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        /* ================= MANAGEMENT ================= */
+
+        .management {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .management-card {
+            min-width: 0;
+            padding: 25px 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .management-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .management-card .icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .management-card h3 {
+            font-size: 16px;
+            word-break: break-word;
+            margin-bottom: 7px;
+        }
+
+        .management-card p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* ================= TOOLBAR ================= */
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search {
+            flex: 1;
+            max-width: 400px;
+            padding: 12px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .search:focus {
+            border-color: #f97316;
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            padding: 8px 12px;
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-card {
+            background: white;
+            border-radius: 14px;
+            overflow-x: auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th {
+            background: #172554;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .present {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .absent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* ================= MODAL ================= */
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .modal-box h2 {
+            margin-bottom: 20px;
+            color: #172554;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #f97316;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        /* ================= ALERT ================= */
+
+        #alertBox {
+            position: fixed;
+            right: 25px;
+            top: 25px;
+            z-index: 2000;
+            min-width: 280px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            display: none;
+            font-weight: bold;
+        }
+
+        #alertBox.success {
+            display: block;
+            background: #16a34a;
+        }
+
+        #alertBox.error {
+            display: block;
+            background: #dc2626;
+        }
+
+        /* ================= EMPTY ================= */
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1100px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .management {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .management {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            XYZ <span>AI</span>
+        </div>
+
+        <div class="menu active" onclick="showPage('dashboardPage', this)">
+            📊 Dashboard
+        </div>
+
+        <div class="menu" onclick="showPage('studentsPage', this)">
+            👨‍🎓 Students
+        </div>
+
+        <div class="menu" onclick="showPage('teachersPage', this)">
+            👩‍🏫 Teachers
+        </div>
+
+        <div class="menu" onclick="showPage('attendancePage', this)">
+            📅 Attendance
+        </div>
+
+        <div class="menu" onclick="showPage('reportsPage', this)">
+            📑 Reports
+        </div>
+
+        <div class="menu logout" onclick="logout()">
+            🚪 Logout
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section id="dashboardPage" class="page active">
+
+            <div class="header">
+
+                <div>
+                    <h1>Principal Dashboard</h1>
+                    <p>XYZ AI School Assistant</p>
+                </div>
+
+                <div id="connectionStatus" class="connection">
+                    Connecting...
+                </div>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <div class="number" id="totalStudents">
+                        0
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Teachers</h3>
+                    <div class="number" id="totalTeachers">
+                        0
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Attendance Records</h3>
+                    <div class="number" id="totalAttendance">
+                        0
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Average Attendance</h3>
+                    <div class="number">
+                        <span id="averageAttendance">0</span>%
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="management">
+
+                <div class="management-card"
+                     onclick="showPageByName('studentsPage')">
+
+                    <div class="icon">👨‍🎓</div>
+
+                    <h3>Student Management</h3>
+
+                    <p>Add, edit and delete students</p>
+
+                </div>
+
+
+                <div class="management-card"
+                     onclick="showPageByName('teachersPage')">
+
+                    <div class="icon">👩‍🏫</div>
+
+                    <h3>Teacher Management</h3>
+
+                    <p>Manage teacher records</p>
+
+                </div>
+
+
+                <div class="management-card"
+                     onclick="showPageByName('attendancePage')">
+
+                    <div class="icon">📅</div>
+
+                    <h3>Attendance Monitoring</h3>
+
+                    <p>Track student attendance</p>
+
+                </div>
+
+
+                <div class="management-card"
+                     onclick="showPageByName('reportsPage')">
+
+                    <div class="icon">📑</div>
+
+                    <h3>Academic Reports</h3>
+
+                    <p>View academic information</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             STUDENTS
+        ================================================== -->
+
+        <section id="studentsPage" class="page">
+
+            <div class="header">
+
+                <div>
+                    <h1>Student Management</h1>
+                    <p>Manage all student records</p>
+                </div>
+
+            </div>
+
+
+            <div class="toolbar">
+
+                <input
+                    type="text"
+                    id="studentSearch"
+                    class="search"
+                    placeholder="Search student..."
+                    onkeyup="filterStudents()"
+                >
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openStudentModal()"
+                >
+                    + Add Student
+                </button>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Attendance</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="studentsTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             TEACHERS
+        ================================================== -->
+
+        <section id="teachersPage" class="page">
+
+            <div class="header">
+
+                <div>
+                    <h1>Teacher Management</h1>
+                    <p>Manage all teacher records</p>
+                </div>
+
+            </div>
+
+
+            <div class="toolbar">
+
+                <input
+                    type="text"
+                    id="teacherSearch"
+                    class="search"
+                    placeholder="Search teacher..."
+                    onkeyup="filterTeachers()"
+                >
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openTeacherModal()"
+                >
+                    + Add Teacher
+                </button>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="teachersTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ATTENDANCE
+        ================================================== -->
+
+        <section id="attendancePage" class="page">
+
+            <div class="header">
+
+                <div>
+                    <h1>Attendance Monitoring</h1>
+                    <p>Track daily student attendance</p>
+                </div>
+
+            </div>
+
+
+            <div class="toolbar">
+
+                <input
+                    type="text"
+                    id="attendanceSearch"
+                    class="search"
+                    placeholder="Search attendance..."
+                    onkeyup="filterAttendance()"
+                >
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openAttendanceModal()"
+                >
+                    + Add Attendance
+                </button>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="attendanceTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
+
+        <section id="reportsPage" class="page">
+
+            <div class="header">
+
+                <div>
+                    <h1>Academic Reports</h1>
+                    <p>Student academic and attendance overview</p>
+                </div>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat-card">
+
+                    <h3>Total Students</h3>
+
+                    <div
+                        class="number"
+                        id="reportStudents"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>Total Teachers</h3>
+
+                    <div
+                        class="number"
+                        id="reportTeachers"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>Attendance Records</h3>
+
+                    <div
+                        class="number"
+                        id="reportAttendance"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>Average Attendance</h3>
+
+                    <div class="number">
+                        <span id="reportAverage">0</span>%
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Attendance</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="reportTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         ALERT
+    ====================================================== -->
+
+    <div id="alertBox"></div>
+
+
+    <!-- =====================================================
+         STUDENT MODAL
+    ====================================================== -->
+
+    <div id="studentModal" class="modal">
+
+        <div class="modal-box">
+
+            <h2 id="studentModalTitle">
+                Add Student
+            </h2>
+
+            <form id="studentForm">
+
+                <input
+                    type="hidden"
+                    id="studentId"
+                >
+
+                <div class="form-group">
+
+                    <label>Student Name</label>
+
+                    <input
+                        type="text"
+                        id="studentName"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Class</label>
+
+                    <input
+                        type="text"
+                        id="studentClass"
+                        placeholder="II AIDS"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Section</label>
+
+                    <input
+                        type="text"
+                        id="studentSection"
+                        placeholder="E"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Attendance Percentage</label>
+
+                    <input
+                        type="number"
+                        id="studentAttendance"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value="0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-cancel"
+                        onclick="closeStudentModal()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save Student
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TEACHER MODAL
+    ====================================================== -->
+
+    <div id="teacherModal" class="modal">
+
+        <div class="modal-box">
+
+            <h2 id="teacherModalTitle">
+                Add Teacher
+            </h2>
+
+            <form id="teacherForm">
+
+                <input
+                    type="hidden"
+                    id="teacherId"
+                >
+
+                <div class="form-group">
+
+                    <label>Teacher Name</label>
+
+                    <input
+                        type="text"
+                        id="teacherName"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Username</label>
+
+                    <input
+                        type="text"
+                        id="teacherUsername"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-cancel"
+                        onclick="closeTeacherModal()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save Teacher
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ATTENDANCE MODAL
+    ====================================================== -->
+
+    <div id="attendanceModal" class="modal">
+
+        <div class="modal-box">
+
+            <h2>Add Attendance</h2>
+
+            <form id="attendanceForm">
+
+                <div class="form-group">
+
+                    <label>Student</label>
+
+                    <select
+                        id="attendanceStudent"
+                        required
+                    >
+
+                        <option value="">
+                            Select Student
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Date</label>
+
+                    <input
+                        type="date"
+                        id="attendanceDate"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Status</label>
+
+                    <select
+                        id="attendanceStatus"
+                        required
+                    >
+
+                        <option value="present">
+                            Present
+                        </option>
+
+                        <option value="absent">
+                            Absent
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-cancel"
+                        onclick="closeAttendanceModal()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save Attendance
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+        const API_BASE = "http://127.0.0.1:8000";
+
+        let students = [];
+        let teachers = [];
+        let attendanceRecords = [];
+
+        /* =================================================
+           ALERT
+        ================================================= */
+
+        function showAlert(message, type = "success") {
+
+            const box = document.getElementById("alertBox");
+
+            box.textContent = message;
+
+            box.className = type;
+
+            setTimeout(() => {
+
+                box.className = "";
+
+            }, 3000);
+        }
+
+
+        /* =================================================
+           PAGE NAVIGATION
+        ================================================= */
+
+        function showPage(pageId, menuElement) {
+
+            document.querySelectorAll(".page")
+                .forEach(page => {
+                    page.classList.remove("active");
+                });
+
+            document.getElementById(pageId)
+                .classList.add("active");
+
+            document.querySelectorAll(".menu")
+                .forEach(menu => {
+                    menu.classList.remove("active");
+                });
+
+            if (menuElement) {
+                menuElement.classList.add("active");
+            }
+
+            if (pageId === "dashboardPage") {
+                loadDashboard();
+            }
+
+            if (pageId === "studentsPage") {
+                loadStudents();
+            }
+
+            if (pageId === "teachersPage") {
+                loadTeachers();
+            }
+
+            if (pageId === "attendancePage") {
+                loadAttendance();
+            }
+
+            if (pageId === "reportsPage") {
+                loadReports();
+            }
+        }
+
+
+        function showPageByName(pageId) {
+
+            const menus = document.querySelectorAll(".menu");
+
+            let selectedMenu = null;
+
+            menus.forEach(menu => {
+
+                if (
+                    menu.getAttribute("onclick") &&
+                    menu.getAttribute("onclick")
+                        .includes(pageId)
+                ) {
+                    selectedMenu = menu;
+                }
+
+            });
+
+            showPage(pageId, selectedMenu);
+        }
+
+
+        /* =================================================
+           API REQUEST
+        ================================================= */
+
+        async function apiRequest(
+            endpoint,
+            options = {}
+        ) {
+
+            try {
+
+                const response = await fetch(
+                    API_BASE + endpoint,
+                    {
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                            ...(options.headers || {})
+                        },
+                        ...options
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Request failed"
+                    );
+
+                }
+
+                return data;
+
+            } catch (error) {
+
+                console.error(error);
+
+                throw error;
+            }
+        }
+
+
+        /* =================================================
+           CHECK CONNECTION
+        ================================================= */
+
+        async function checkConnection() {
+
+            const status =
+                document.getElementById(
+                    "connectionStatus"
+                );
+
+            try {
+
+                await apiRequest("/health");
+
+                status.textContent =
+                    "● Backend Connected";
+
+                status.style.background =
+                    "#dcfce7";
+
+                status.style.color =
+                    "#166534";
+
+            } catch (error) {
+
+                status.textContent =
+                    "● Backend Offline";
+
+                status.style.background =
+                    "#fee2e2";
+
+                status.style.color =
+                    "#991b1b";
+            }
+        }
+
+
+        /* =================================================
+           DASHBOARD
+        ================================================= */
+
+        async function loadDashboard() {
+
+            try {
+
+                const data =
+                    await apiRequest("/dashboard");
+
+                document.getElementById(
+                    "totalStudents"
+                ).textContent =
+                    data.total_students;
+
+                document.getElementById(
+                    "totalTeachers"
+                ).textContent =
+                    data.total_teachers;
+
+                document.getElementById(
+                    "totalAttendance"
+                ).textContent =
+                    data.total_attendance_records;
+
+                document.getElementById(
+                    "averageAttendance"
+                ).textContent =
+                    data.average_attendance;
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        /* =================================================
+           STUDENTS
+        ================================================= */
+
+        async function loadStudents() {
+
+            try {
+
+                students =
+                    await apiRequest("/students");
+
+                renderStudents();
+
+                updateStudentDropdown();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        function renderStudents(
+            list = students
+        ) {
+
+            const tbody =
+                document.getElementById(
+                    "studentsTableBody"
+                );
+
+            tbody.innerHTML = "";
+
+            if (list.length === 0) {
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty">
+                            No students found
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            list.forEach(student => {
+
+                const row =
+                    document.createElement("tr");
+
+                row.innerHTML = `
+
+                    <td>${student.id}</td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(student.name)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            student.class_name || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            student.section || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${student.attendance_percentage || 0}%
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-edit"
+                            onclick="editStudent(${student.id})"
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            class="btn btn-delete"
+                            onclick="deleteStudent(${student.id})"
+                        >
+                            Delete
+                        </button>
+
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+
+            });
+        }
+
+
+        function filterStudents() {
+
+            const query =
+                document.getElementById(
+                    "studentSearch"
+                ).value.toLowerCase();
+
+            const filtered =
+                students.filter(student =>
+                    String(student.name)
+                        .toLowerCase()
+                        .includes(query)
+                );
+
+            renderStudents(filtered);
+        }
+
+
+        /* =================================================
+           STUDENT MODAL
+        ================================================= */
+
+        function openStudentModal(student = null) {
+
+            document
+                .getElementById("studentModal")
+                .classList.add("show");
+
+            if (student) {
+
+                document.getElementById(
+                    "studentModalTitle"
+                ).textContent =
+                    "Edit Student";
+
+                document.getElementById(
+                    "studentId"
+                ).value = student.id;
+
+                document.getElementById(
+                    "studentName"
+                ).value = student.name;
+
+                document.getElementById(
+                    "studentClass"
+                ).value =
+                    student.class_name || "";
+
+                document.getElementById(
+                    "studentSection"
+                ).value =
+                    student.section || "";
+
+                document.getElementById(
+                    "studentAttendance"
+                ).value =
+                    student.attendance_percentage || 0;
+
+            } else {
+
+                document.getElementById(
+                    "studentModalTitle"
+                ).textContent =
+                    "Add Student";
+
+                document.getElementById(
+                    "studentForm"
+                ).reset();
+
+                document.getElementById(
+                    "studentId"
+                ).value = "";
+
+            }
+        }
+
+
+        function closeStudentModal() {
+
+            document
+                .getElementById("studentModal")
+                .classList.remove("show");
+        }
+
+
+        function editStudent(id) {
+
+            const student =
+                students.find(
+                    item => item.id === id
+                );
+
+            if (student) {
+                openStudentModal(student);
+            }
+        }
+
+
+        async function deleteStudent(id) {
+
+            if (
+                !confirm(
+                    "Are you sure you want to delete this student?"
+                )
+            ) {
+                return;
+            }
+
+            try {
+
+                await apiRequest(
+                    `/students/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                showAlert(
+                    "Student deleted successfully"
+                );
+
+                await loadStudents();
+                await loadDashboard();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        document.getElementById(
+            "studentForm"
+        ).addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const id =
+                    document.getElementById(
+                        "studentId"
+                    ).value;
+
+                const payload = {
+
+                    name:
+                        document.getElementById(
+                            "studentName"
+                        ).value.trim(),
+
+                    class_name:
+                        document.getElementById(
+                            "studentClass"
+                        ).value.trim(),
+
+                    section:
+                        document.getElementById(
+                            "studentSection"
+                        ).value.trim(),
+
+                    attendance_percentage:
+                        Number(
+                            document.getElementById(
+                                "studentAttendance"
+                            ).value
+                        )
+
+                };
+
+                try {
+
+                    if (id) {
+
+                        await apiRequest(
+                            `/students/${id}`,
+                            {
+                                method: "PUT",
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+
+                        showAlert(
+                            "Student updated successfully"
+                        );
+
+                    } else {
+
+                        await apiRequest(
+                            "/students",
+                            {
+                                method: "POST",
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+
+                        showAlert(
+                            "Student added successfully"
+                        );
+                    }
+
+                    closeStudentModal();
+
+                    await loadStudents();
+
+                    await loadDashboard();
+
+                } catch (error) {
+
+                    showAlert(
+                        error.message,
+                        "error"
+                    );
+                }
+            }
+        );
+
+
+        /* =================================================
+           TEACHERS
+        ================================================= */
+
+        async function loadTeachers() {
+
+            try {
+
+                teachers =
+                    await apiRequest("/teachers");
+
+                renderTeachers();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        function renderTeachers(
+            list = teachers
+        ) {
+
+            const tbody =
+                document.getElementById(
+                    "teachersTableBody"
+                );
+
+            tbody.innerHTML = "";
+
+            if (list.length === 0) {
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty">
+                            No teachers found
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            list.forEach(teacher => {
+
+                const row =
+                    document.createElement("tr");
+
+                row.innerHTML = `
+
+                    <td>${teacher.id}</td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(
+                                teacher.name
+                            )}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            teacher.username
+                        )}
+                    </td>
+
+                    <td>
+                        <span class="badge present">
+                            ${escapeHtml(
+                                teacher.role
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-edit"
+                            onclick="editTeacher(${teacher.id})"
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            class="btn btn-delete"
+                            onclick="deleteTeacher(${teacher.id})"
+                        >
+                            Delete
+                        </button>
+
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+
+            });
+        }
+
+
+        function filterTeachers() {
+
+            const query =
+                document.getElementById(
+                    "teacherSearch"
+                ).value.toLowerCase();
+
+            const filtered =
+                teachers.filter(teacher =>
+
+                    String(teacher.name)
+                        .toLowerCase()
+                        .includes(query)
+
+                    ||
+
+                    String(teacher.username)
+                        .toLowerCase()
+                        .includes(query)
+                );
+
+            renderTeachers(filtered);
+        }
+
+
+        function openTeacherModal(
+            teacher = null
+        ) {
+
+            document
+                .getElementById("teacherModal")
+                .classList.add("show");
+
+            if (teacher) {
+
+                document.getElementById(
+                    "teacherModalTitle"
+                ).textContent =
+                    "Edit Teacher";
+
+                document.getElementById(
+                    "teacherId"
+                ).value =
+                    teacher.id;
+
+                document.getElementById(
+                    "teacherName"
+                ).value =
+                    teacher.name;
+
+                document.getElementById(
+                    "teacherUsername"
+                ).value =
+                    teacher.username;
+
+            } else {
+
+                document.getElementById(
+                    "teacherModalTitle"
+                ).textContent =
+                    "Add Teacher";
+
+                document.getElementById(
+                    "teacherForm"
+                ).reset();
+
+                document.getElementById(
+                    "teacherId"
+                ).value = "";
+            }
+        }
+
+
+        function closeTeacherModal() {
+
+            document
+                .getElementById("teacherModal")
+                .classList.remove("show");
+        }
+
+
+        function editTeacher(id) {
+
+            const teacher =
+                teachers.find(
+                    item => item.id === id
+                );
+
+            if (teacher) {
+                openTeacherModal(teacher);
+            }
+        }
+
+
+        async function deleteTeacher(id) {
+
+            if (
+                !confirm(
+                    "Are you sure you want to delete this teacher?"
+                )
+            ) {
+                return;
+            }
+
+            try {
+
+                await apiRequest(
+                    `/teachers/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                showAlert(
+                    "Teacher deleted successfully"
+                );
+
+                await loadTeachers();
+
+                await loadDashboard();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        document.getElementById(
+            "teacherForm"
+        ).addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const id =
+                    document.getElementById(
+                        "teacherId"
+                    ).value;
+
+                const payload = {
+
+                    name:
+                        document.getElementById(
+                            "teacherName"
+                        ).value.trim(),
+
+                    username:
+                        document.getElementById(
+                            "teacherUsername"
+                        ).value.trim()
+
+                };
+
+                try {
+
+                    if (id) {
+
+                        await apiRequest(
+                            `/teachers/${id}`,
+                            {
+                                method: "PUT",
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+
+                        showAlert(
+                            "Teacher updated successfully"
+                        );
+
+                    } else {
+
+                        await apiRequest(
+                            "/teachers",
+                            {
+                                method: "POST",
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+
+                        showAlert(
+                            "Teacher added successfully"
+                        );
+                    }
+
+                    closeTeacherModal();
+
+                    await loadTeachers();
+
+                    await loadDashboard();
+
+                } catch (error) {
+
+                    showAlert(
+                        error.message,
+                        "error"
+                    );
+                }
+            }
+        );
+
+
+        /* =================================================
+           ATTENDANCE
+        ================================================= */
+
+        async function loadAttendance() {
+
+            try {
+
+                attendanceRecords =
+                    await apiRequest(
+                        "/attendance"
+                    );
+
+                await loadStudents();
+
+                renderAttendance();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        function renderAttendance(
+            list = attendanceRecords
+        ) {
+
+            const tbody =
+                document.getElementById(
+                    "attendanceTableBody"
+                );
+
+            tbody.innerHTML = "";
+
+            if (list.length === 0) {
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty">
+                            No attendance records found
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            list.forEach(record => {
+
+                const student =
+                    students.find(
+                        s =>
+                            s.id ===
+                            record.student_id
+                    );
+
+                const studentName =
+                    student
+                        ? student.name
+                        : `Student #${record.student_id}`;
+
+                const statusClass =
+                    record.status === "present"
+                        ? "present"
+                        : "absent";
+
+                const row =
+                    document.createElement("tr");
+
+                row.innerHTML = `
+
+                    <td>${record.id}</td>
+
+                    <td>
+                        ${escapeHtml(
+                            studentName
+                        )}
+                    </td>
+
+                    <td>
+                        ${record.date}
+                    </td>
+
+                    <td>
+                        <span
+                            class="badge ${statusClass}"
+                        >
+                            ${escapeHtml(
+                                record.status
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-delete"
+                            onclick="deleteAttendance(${record.id})"
+                        >
+                            Delete
+                        </button>
+
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+
+            });
+        }
+
+
+        function filterAttendance() {
+
+            const query =
+                document.getElementById(
+                    "attendanceSearch"
+                ).value.toLowerCase();
+
+            const filtered =
+                attendanceRecords.filter(
+                    record => {
+
+                        const student =
+                            students.find(
+                                s =>
+                                    s.id ===
+                                    record.student_id
+                            );
+
+                        const name =
+                            student
+                                ? student.name
+                                : "";
+
+                        return (
+                            name
+                                .toLowerCase()
+                                .includes(query)
+                            ||
+                            record.date
+                                .toLowerCase()
+                                .includes(query)
+                            ||
+                            record.status
+                                .toLowerCase()
+                                .includes(query)
+                        );
+                    }
+                );
+
+            renderAttendance(filtered);
+        }
+
+
+        function updateStudentDropdown() {
+
+            const select =
+                document.getElementById(
+                    "attendanceStudent"
+                );
+
+            select.innerHTML = `
+                <option value="">
+                    Select Student
+                </option>
+            `;
+
+            students.forEach(student => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    student.id;
+
+                option.textContent =
+                    `${student.name} - ${student.class_name || ""} ${student.section || ""}`;
+
+                select.appendChild(option);
+
+            });
+        }
+
+
+        function openAttendanceModal() {
+
+            document
+                .getElementById(
+                    "attendanceModal"
+                )
+                .classList.add("show");
+
+            updateStudentDropdown();
+
+            document.getElementById(
+                "attendanceForm"
+            ).reset();
+
+            document.getElementById(
+                "attendanceDate"
+            ).value =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+        }
+
+
+        function closeAttendanceModal() {
+
+            document
+                .getElementById(
+                    "attendanceModal"
+                )
+                .classList.remove("show");
+        }
+
+
+        document.getElementById(
+            "attendanceForm"
+        ).addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const payload = {
+
+                    student_id:
+                        Number(
+                            document.getElementById(
+                                "attendanceStudent"
+                            ).value
+                        ),
+
+                    date:
+                        document.getElementById(
+                            "attendanceDate"
+                        ).value,
+
+                    status:
+                        document.getElementById(
+                            "attendanceStatus"
+                        ).value
+
+                };
+
+                try {
+
+                    await apiRequest(
+                        "/attendance",
+                        {
+                            method: "POST",
+                            body:
+                                JSON.stringify(
+                                    payload
+                                )
+                        }
+                    );
+
+                    showAlert(
+                        "Attendance added successfully"
+                    );
+
+                    closeAttendanceModal();
+
+                    await loadAttendance();
+
+                    await loadDashboard();
+
+                } catch (error) {
+
+                    showAlert(
+                        error.message,
+                        "error"
+                    );
+                }
+            }
+        );
+
+
+        async function deleteAttendance(id) {
+
+            if (
+                !confirm(
+                    "Delete this attendance record?"
+                )
+            ) {
+                return;
+            }
+
+            try {
+
+                await apiRequest(
+                    `/attendance/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                showAlert(
+                    "Attendance deleted successfully"
+                );
+
+                await loadAttendance();
+
+                await loadDashboard();
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        /* =================================================
+           REPORTS
+        ================================================= */
+
+        async function loadReports() {
+
+            try {
+
+                const dashboard =
+                    await apiRequest(
+                        "/dashboard"
+                    );
+
+                students =
+                    await apiRequest(
+                        "/students"
+                    );
+
+                document.getElementById(
+                    "reportStudents"
+                ).textContent =
+                    dashboard.total_students;
+
+                document.getElementById(
+                    "reportTeachers"
+                ).textContent =
+                    dashboard.total_teachers;
+
+                document.getElementById(
+                    "reportAttendance"
+                ).textContent =
+                    dashboard.total_attendance_records;
+
+                document.getElementById(
+                    "reportAverage"
+                ).textContent =
+                    dashboard.average_attendance;
+
+                const tbody =
+                    document.getElementById(
+                        "reportTableBody"
+                    );
+
+                tbody.innerHTML = "";
+
+                if (students.length === 0) {
+
+                    tbody.innerHTML = `
+                        <tr>
+                            <td
+                                colspan="4"
+                                class="empty"
+                            >
+                                No student data available
+                            </td>
+                        </tr>
+                    `;
+
+                    return;
+                }
+
+                students.forEach(student => {
+
+                    const row =
+                        document.createElement("tr");
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${escapeHtml(
+                                student.name
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                student.class_name || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                student.section || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${student.attendance_percentage || 0}%
+                        </td>
+
+                    `;
+
+                    tbody.appendChild(row);
+
+                });
+
+            } catch (error) {
+
+                showAlert(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+
+
+        /* =================================================
+           HTML ESCAPE
+        ================================================= */
+
+        function escapeHtml(value) {
+
+            if (value === null ||
+                value === undefined) {
+                return "";
+            }
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        /* =================================================
+           LOGOUT
+        ================================================= */
+
+        function logout() {
+
+            if (
+                confirm(
+                    "Are you sure you want to logout?"
+                )
+            ) {
+
+                window.location.href =
+                    "/login";
+            }
+        }
+
+
+        /* =================================================
+           CLOSE MODALS WHEN CLICK OUTSIDE
+        ================================================= */
+
+        window.addEventListener(
+            "click",
+            function(event) {
+
+                const studentModal =
+                    document.getElementById(
+                        "studentModal"
+                    );
+
+                const teacherModal =
+                    document.getElementById(
+                        "teacherModal"
+                    );
+
+                const attendanceModal =
+                    document.getElementById(
+                        "attendanceModal"
+                    );
+
+                if (event.target === studentModal) {
+                    closeStudentModal();
+                }
+
+                if (event.target === teacherModal) {
+                    closeTeacherModal();
+                }
+
+                if (event.target === attendanceModal) {
+                    closeAttendanceModal();
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           INITIAL LOAD
+        ================================================= */
+
+        async function initialize() {
+
+            await checkConnection();
+
+            await loadDashboard();
+
+            await loadStudents();
+
+            await loadTeachers();
+
+        }
+
+
+        initialize();
+
+    </script>
+
+</body>
+
+</html>

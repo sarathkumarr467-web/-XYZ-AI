@@ -1,0 +1,988 @@
+import os
+import json
+import joblib
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+)
+
+
+# =========================================================
+# PATHS
+# =========================================================
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+DATA_PATH = os.path.join(
+    BASE_DIR,
+    "data",
+    "dataset.csv"
+)
+
+MODEL_DIR = os.path.join(
+    BASE_DIR,
+    "models"
+)
+
+MODEL_PATH = os.path.join(
+    MODEL_DIR,
+    "student_model.pkl"
+)
+
+METADATA_PATH = os.path.join(
+    MODEL_DIR,
+    "model_metadata.json"
+)
+
+
+# =========================================================
+# CREATE MODEL DIRECTORY
+# =========================================================
+
+os.makedirs(
+    MODEL_DIR,
+    exist_ok=True
+)
+
+
+print()
+print("=" * 70)
+print("XYZ AI - STUDENT ML MODEL TRAINING")
+print("=" * 70)
+
+
+# =========================================================
+# CHECK DATASET
+# =========================================================
+
+if not os.path.exists(DATA_PATH):
+
+    print()
+    print("ERROR: dataset.csv not found.")
+    print()
+    print("Expected location:")
+    print(DATA_PATH)
+    print()
+
+    raise FileNotFoundError(
+        f"Dataset not found: {DATA_PATH}"
+    )
+
+
+# =========================================================
+# LOAD DATASET
+# =========================================================
+
+print()
+print("Loading dataset...")
+
+df = pd.read_csv(
+    DATA_PATH
+)
+
+print(
+    f"Dataset shape: {df.shape}"
+)
+
+
+# =========================================================
+# DISPLAY ORIGINAL COLUMNS
+# =========================================================
+
+print()
+print("Original columns:")
+
+for column in df.columns:
+
+    print(
+        " -",
+        column
+    )
+
+
+# =========================================================
+# CLEAN COLUMN NAMES
+# =========================================================
+
+df.columns = (
+    df.columns
+    .astype(str)
+    .str.strip()
+    .str.lower()
+    .str.replace(
+        " ",
+        "_",
+        regex=False
+    )
+    .str.replace(
+        "-",
+        "_",
+        regex=False
+    )
+)
+
+
+print()
+print("Cleaned columns:")
+
+print(
+    df.columns.tolist()
+)
+
+
+# =========================================================
+# REMOVE COMPLETELY EMPTY COLUMNS
+# =========================================================
+
+empty_columns = []
+
+for column in df.columns:
+
+    if df[column].isna().all():
+
+        empty_columns.append(
+            column
+        )
+
+
+if empty_columns:
+
+    print()
+    print("Removing empty columns:")
+
+    for column in empty_columns:
+
+        print(
+            " -",
+            column
+        )
+
+    df = df.drop(
+        columns=empty_columns
+    )
+
+
+# =========================================================
+# REMOVE DUPLICATE ROWS
+# =========================================================
+
+before_duplicates = len(df)
+
+df = df.drop_duplicates()
+
+after_duplicates = len(df)
+
+removed_duplicates = (
+    before_duplicates
+    - after_duplicates
+)
+
+print()
+print(
+    f"Duplicate rows removed: "
+    f"{removed_duplicates}"
+)
+
+
+# =========================================================
+# TARGET COLUMN DETECTION
+# =========================================================
+
+possible_targets = [
+
+    "risk",
+
+    "risk_level",
+
+    "student_risk",
+
+    "academic_risk",
+
+    "risk_score",
+
+    "risk_category",
+
+    "performance",
+
+    "performance_score",
+
+    "academic_performance",
+
+    "final_score",
+
+    "final_grade",
+
+    "grade",
+
+    "result",
+
+    "outcome",
+
+    "prediction",
+
+    "target",
+
+    "label",
+
+    "class",
+
+    "status",
+
+    "hired",
+
+    "hired_status",
+
+    "placement",
+
+    "placement_status"
+]
+
+
+target_column = None
+
+
+for target in possible_targets:
+
+    if target in df.columns:
+
+        target_column = target
+
+        break
+
+
+# =========================================================
+# IF TARGET NOT FOUND
+# =========================================================
+
+if target_column is None:
+
+    print()
+    print("=" * 70)
+    print("TARGET COLUMN WAS NOT AUTOMATICALLY FOUND")
+    print("=" * 70)
+
+    print()
+    print("Available columns:")
+
+    for index, column in enumerate(
+        df.columns,
+        start=1
+    ):
+
+        print(
+            f"{index}. {column}"
+        )
+
+    print()
+
+    raise ValueError(
+        "Target column could not be identified. "
+        "Rename the prediction column to one of the "
+        "supported target names."
+    )
+
+
+print()
+print(
+    f"Target column selected: {target_column}"
+)
+
+
+# =========================================================
+# REMOVE ROWS WITH MISSING TARGET
+# =========================================================
+
+before_target_clean = len(df)
+
+df = df.dropna(
+    subset=[
+        target_column
+    ]
+).reset_index(
+    drop=True
+)
+
+removed_target_rows = (
+    before_target_clean
+    - len(df)
+)
+
+print()
+print(
+    f"Rows removed because target was missing: "
+    f"{removed_target_rows}"
+)
+
+
+# =========================================================
+# CHECK DATA SIZE
+# =========================================================
+
+if len(df) < 10:
+
+    raise ValueError(
+        "Dataset contains fewer than 10 valid rows. "
+        "At least 10 rows are required."
+    )
+
+
+# =========================================================
+# FEATURES + TARGET
+# =========================================================
+
+X = df.drop(
+    columns=[
+        target_column
+    ]
+)
+
+y = df[
+    target_column
+]
+
+
+# =========================================================
+# REMOVE ID / INDEX COLUMNS
+# =========================================================
+
+columns_to_remove = []
+
+
+for column in X.columns:
+
+    column_name = (
+        str(column)
+        .strip()
+        .lower()
+    )
+
+    unique_count = (
+        X[column]
+        .nunique(
+            dropna=True
+        )
+    )
+
+
+    if column_name in [
+
+        "id",
+
+        "student_id",
+
+        "studentid",
+
+        "user_id",
+
+        "userid",
+
+        "index",
+
+        "serial_no",
+
+        "serial_number",
+
+        "s_no",
+
+        "sl_no"
+
+    ]:
+
+        columns_to_remove.append(
+            column
+        )
+
+
+    elif (
+        unique_count == len(X)
+        and len(X) > 20
+    ):
+
+        columns_to_remove.append(
+            column
+        )
+
+
+if columns_to_remove:
+
+    print()
+    print("Removing ID-like columns:")
+
+    for column in columns_to_remove:
+
+        print(
+            " -",
+            column
+        )
+
+    X = X.drop(
+        columns=columns_to_remove
+    )
+
+
+# =========================================================
+# CHECK FEATURES
+# =========================================================
+
+if X.shape[1] == 0:
+
+    raise ValueError(
+        "No usable features found in dataset."
+    )
+
+
+# =========================================================
+# IDENTIFY NUMERIC FEATURES
+# =========================================================
+
+numeric_features = (
+    X.select_dtypes(
+        include=[
+            "number"
+        ]
+    )
+    .columns
+    .tolist()
+)
+
+
+# =========================================================
+# IDENTIFY CATEGORICAL FEATURES
+# =========================================================
+
+categorical_features = (
+    X.select_dtypes(
+        exclude=[
+            "number"
+        ]
+    )
+    .columns
+    .tolist()
+)
+
+
+print()
+print("=" * 70)
+print("FEATURE INFORMATION")
+print("=" * 70)
+
+print()
+print(
+    "Numeric features:"
+)
+
+for column in numeric_features:
+
+    print(
+        " -",
+        column
+    )
+
+
+print()
+print(
+    "Categorical features:"
+)
+
+for column in categorical_features:
+
+    print(
+        " -",
+        column
+    )
+
+
+# =========================================================
+# PREPROCESSING
+# =========================================================
+
+transformers = []
+
+
+if numeric_features:
+
+    numeric_pipeline = Pipeline(
+        steps=[
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy="median"
+                )
+            )
+        ]
+    )
+
+    transformers.append(
+        (
+            "numeric",
+            numeric_pipeline,
+            numeric_features
+        )
+    )
+
+
+if categorical_features:
+
+    categorical_pipeline = Pipeline(
+        steps=[
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy="most_frequent"
+                )
+            ),
+
+            (
+                "encoder",
+                OneHotEncoder(
+                    handle_unknown="ignore"
+                )
+            )
+        ]
+    )
+
+    transformers.append(
+        (
+            "categorical",
+            categorical_pipeline,
+            categorical_features
+        )
+    )
+
+
+preprocessor = ColumnTransformer(
+    transformers=transformers
+)
+
+
+# =========================================================
+# DETERMINE MODEL TYPE
+# =========================================================
+
+unique_targets = y.nunique()
+
+target_dtype = str(
+    y.dtype
+)
+
+
+if (
+    target_dtype == "object"
+    or target_dtype == "category"
+    or unique_targets <= 10
+):
+
+    model_type = "classification"
+
+    model = RandomForestClassifier(
+        n_estimators=200,
+        random_state=42,
+        class_weight="balanced",
+        n_jobs=-1
+    )
+
+else:
+
+    model_type = "regression"
+
+    model = RandomForestRegressor(
+        n_estimators=200,
+        random_state=42,
+        n_jobs=-1
+    )
+
+
+print()
+print(
+    f"Model type: {model_type}"
+)
+
+
+print()
+print(
+    f"Number of target classes/values: "
+    f"{unique_targets}"
+)
+
+
+# =========================================================
+# PIPELINE
+# =========================================================
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+
+        (
+            "model",
+            model
+        )
+    ]
+)
+
+
+# =========================================================
+# TRAIN / TEST SPLIT
+# =========================================================
+
+print()
+print(
+    "Splitting dataset..."
+)
+
+
+if model_type == "classification":
+
+    try:
+
+        X_train, X_test, y_train, y_test = (
+            train_test_split(
+                X,
+                y,
+                test_size=0.20,
+                random_state=42,
+                stratify=y
+            )
+        )
+
+    except ValueError:
+
+        print()
+        print(
+            "Stratified split unavailable."
+        )
+
+        print(
+            "Using normal random split."
+        )
+
+        X_train, X_test, y_train, y_test = (
+            train_test_split(
+                X,
+                y,
+                test_size=0.20,
+                random_state=42
+            )
+        )
+
+else:
+
+    X_train, X_test, y_train, y_test = (
+        train_test_split(
+            X,
+            y,
+            test_size=0.20,
+            random_state=42
+        )
+    )
+
+
+print(
+    f"Training rows: {len(X_train)}"
+)
+
+print(
+    f"Testing rows: {len(X_test)}"
+)
+
+
+# =========================================================
+# TRAIN MODEL
+# =========================================================
+
+print()
+print("=" * 70)
+print("TRAINING MODEL")
+print("=" * 70)
+
+pipeline.fit(
+    X_train,
+    y_train
+)
+
+print()
+print(
+    "Model training completed successfully."
+)
+
+
+# =========================================================
+# PREDICTION
+# =========================================================
+
+print()
+print(
+    "Generating test predictions..."
+)
+
+y_pred = pipeline.predict(
+    X_test
+)
+
+
+# =========================================================
+# EVALUATION
+# =========================================================
+
+metrics = {}
+
+
+print()
+print("=" * 70)
+print("MODEL EVALUATION")
+print("=" * 70)
+
+
+if model_type == "classification":
+
+    accuracy = accuracy_score(
+        y_test,
+        y_pred
+    )
+
+    precision = precision_score(
+        y_test,
+        y_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+    recall = recall_score(
+        y_test,
+        y_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+    f1 = f1_score(
+        y_test,
+        y_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+
+    metrics = {
+
+        "accuracy": round(
+            float(accuracy),
+            4
+        ),
+
+        "precision": round(
+            float(precision),
+            4
+        ),
+
+        "recall": round(
+            float(recall),
+            4
+        ),
+
+        "f1_score": round(
+            float(f1),
+            4
+        )
+    }
+
+
+    print()
+    print(
+        f"Accuracy  : {accuracy:.4f}"
+    )
+
+    print(
+        f"Precision : {precision:.4f}"
+    )
+
+    print(
+        f"Recall    : {recall:.4f}"
+    )
+
+    print(
+        f"F1 Score  : {f1:.4f}"
+    )
+
+
+else:
+
+    mae = mean_absolute_error(
+        y_test,
+        y_pred
+    )
+
+    mse = mean_squared_error(
+        y_test,
+        y_pred
+    )
+
+    r2 = r2_score(
+        y_test,
+        y_pred
+    )
+
+
+    metrics = {
+
+        "mae": round(
+            float(mae),
+            4
+        ),
+
+        "mse": round(
+            float(mse),
+            4
+        ),
+
+        "r2": round(
+            float(r2),
+            4
+        )
+    }
+
+
+    print()
+    print(
+        f"MAE : {mae:.4f}"
+    )
+
+    print(
+        f"MSE : {mse:.4f}"
+    )
+
+    print(
+        f"R2  : {r2:.4f}"
+    )
+
+
+# =========================================================
+# SAVE MODEL
+# =========================================================
+
+print()
+print(
+    "Saving trained model..."
+)
+
+joblib.dump(
+    pipeline,
+    MODEL_PATH
+)
+
+
+# =========================================================
+# SAVE METADATA
+# =========================================================
+
+metadata = {
+
+    "project": (
+        "XYZ AI School Assistant"
+    ),
+
+    "dataset": "dataset.csv",
+
+    "rows": int(
+        len(df)
+    ),
+
+    "columns": int(
+        df.shape[1]
+    ),
+
+    "target_column": (
+        target_column
+    ),
+
+    "model_type": (
+        model_type
+    ),
+
+    "features": (
+        X.columns.tolist()
+    ),
+
+    "numeric_features": (
+        numeric_features
+    ),
+
+    "categorical_features": (
+        categorical_features
+    ),
+
+    "metrics": metrics
+}
+
+
+with open(
+    METADATA_PATH,
+    "w",
+    encoding="utf-8"
+) as file:
+
+    json.dump(
+        metadata,
+        file,
+        indent=4
+    )
+
+
+# =========================================================
+# FINAL OUTPUT
+# =========================================================
+
+print()
+print("=" * 70)
+print("MODEL TRAINING COMPLETED SUCCESSFULLY ✅")
+print("=" * 70)
+
+print()
+print(
+    "Model file:"
+)
+
+print(
+    MODEL_PATH
+)
+
+print()
+print(
+    "Metadata file:"
+)
+
+print(
+    METADATA_PATH
+)
+
+print()
+print(
+    "Next command:"
+)
+
+print(
+    "uvicorn app.main:app --reload"
+)
+
+print()
+print("=" * 70)

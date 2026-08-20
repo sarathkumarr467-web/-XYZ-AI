@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>XYZ AI - Reports</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6fb;
+    color:#111827;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:240px;
+    height:100vh;
+    background:#111827;
+    color:white;
+    padding:25px 15px;
+}
+
+.logo{
+    text-align:center;
+    font-size:25px;
+    font-weight:bold;
+    margin-bottom:35px;
+}
+
+.logo span{
+    color:#f97316;
+}
+
+.menu{
+    padding:14px 15px;
+    margin-bottom:8px;
+    border-radius:10px;
+    color:#d1d5db;
+    cursor:pointer;
+}
+
+.menu:hover,
+.menu.active{
+    background:#f97316;
+    color:white;
+}
+
+.main{
+    margin-left:240px;
+    padding:30px;
+    width:calc(100% - 240px);
+}
+
+.header{
+    margin-bottom:25px;
+}
+
+.header h1{
+    color:#172554;
+}
+
+.header p{
+    color:#64748b;
+    margin-top:6px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.stat{
+    background:white;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+}
+
+.stat h3{
+    color:#64748b;
+    font-size:14px;
+}
+
+.stat p{
+    margin-top:10px;
+    font-size:28px;
+    font-weight:bold;
+    color:#172554;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+    margin-bottom:25px;
+}
+
+.card h2{
+    color:#172554;
+    margin-bottom:20px;
+}
+
+.table-card{
+    background:white;
+    border-radius:14px;
+    overflow-x:auto;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#172554;
+    color:white;
+    padding:15px;
+    text-align:left;
+}
+
+td{
+    padding:14px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.good{
+    color:#15803d;
+    font-weight:bold;
+}
+
+.warning{
+    color:#ca8a04;
+    font-weight:bold;
+}
+
+.danger{
+    color:#dc2626;
+    font-weight:bold;
+}
+
+.progress{
+    width:150px;
+    height:9px;
+    background:#e5e7eb;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    background:#f97316;
+}
+
+button{
+    border:none;
+    border-radius:8px;
+    padding:12px 18px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.refresh{
+    background:#2563eb;
+    color:white;
+}
+
+@media(max-width:1000px){
+
+    .stats{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+}
+
+@media(max-width:650px){
+
+    .sidebar{
+        width:190px;
+    }
+
+    .main{
+        margin-left:190px;
+        width:calc(100% - 190px);
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        XYZ <span>AI</span>
+    </div>
+
+
+    <div class="menu"
+         onclick="go('principal.html')">
+
+        📊 Dashboard
+
+    </div>
+
+
+    <div class="menu"
+         onclick="go('student.html')">
+
+        👨‍🎓 Students
+
+    </div>
+
+
+    <div class="menu"
+         onclick="go('teacher.html')">
+
+        👩‍🏫 Teachers
+
+    </div>
+
+
+    <div class="menu"
+         onclick="go('attendance.html')">
+
+        📅 Attendance
+
+    </div>
+
+
+    <div class="menu active">
+
+        📑 Reports
+
+    </div>
+
+</div>
+
+
+
+<!-- MAIN -->
+
+<div class="main">
+
+
+    <div class="header">
+
+        <h1>
+            Academic Reports
+        </h1>
+
+        <p>
+            Student performance and attendance summary
+        </p>
+
+    </div>
+
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+
+        <div class="stat">
+
+            <h3>
+                Total Students
+            </h3>
+
+            <p id="totalStudents">
+                0
+            </p>
+
+        </div>
+
+
+
+        <div class="stat">
+
+            <h3>
+                Attendance Records
+            </h3>
+
+            <p id="totalRecords">
+                0
+            </p>
+
+        </div>
+
+
+
+        <div class="stat">
+
+            <h3>
+                Present Records
+            </h3>
+
+            <p id="presentRecords">
+                0
+            </p>
+
+        </div>
+
+
+
+        <div class="stat">
+
+            <h3>
+                Average Attendance
+            </h3>
+
+            <p id="averageAttendance">
+                0%
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- REPORT -->
+
+    <div class="card">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+        ">
+
+            <h2>
+                Student Attendance Report
+            </h2>
+
+
+            <button
+                class="refresh"
+                onclick="loadData()">
+
+                🔄 Refresh
+
+            </button>
+
+        </div>
+
+
+
+        <div class="table-card">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Class
+                        </th>
+
+                        <th>
+                            Section
+                        </th>
+
+                        <th>
+                            Attendance
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="reportTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SUMMARY -->
+
+    <div class="card">
+
+        <h2>
+            Attendance Summary
+        </h2>
+
+
+        <div id="summary">
+
+            Loading...
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+const API =
+    "http://127.0.0.1:8000";
+
+
+let students = [];
+
+let attendance = [];
+
+
+
+function go(page){
+
+    window.location.href =
+        page;
+
+}
+
+
+
+async function loadData(){
+
+    try{
+
+
+        const studentsResponse =
+            await fetch(
+                API + "/students"
+            );
+
+
+        const attendanceResponse =
+            await fetch(
+                API + "/attendance"
+            );
+
+
+        if(
+            !studentsResponse.ok ||
+            !attendanceResponse.ok
+        ){
+
+            throw new Error(
+                "Failed to load report data"
+            );
+
+        }
+
+
+        students =
+            await studentsResponse.json();
+
+
+        attendance =
+            await attendanceResponse.json();
+
+
+        generateReport();
+
+
+    }
+    catch(error){
+
+        document.getElementById(
+            "reportTable"
+        ).innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        text-align:center;
+                        padding:30px;
+                        color:#dc2626;
+                    "
+                >
+
+                    ${error.message}
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+
+function generateReport(){
+
+
+    document.getElementById(
+        "totalStudents"
+    ).textContent =
+        students.length;
+
+
+    document.getElementById(
+        "totalRecords"
+    ).textContent =
+        attendance.length;
+
+
+
+    const present =
+        attendance.filter(
+            record =>
+                record.status === "present"
+        ).length;
+
+
+    document.getElementById(
+        "presentRecords"
+    ).textContent =
+        present;
+
+
+
+    let totalPercentage = 0;
+
+
+    students.forEach(
+        student => {
+
+            totalPercentage +=
+                Number(
+                    student.attendance_percentage || 0
+                );
+
+        }
+    );
+
+
+    const average =
+        students.length
+        ? (
+            totalPercentage /
+            students.length
+          ).toFixed(2)
+        : 0;
+
+
+    document.getElementById(
+        "averageAttendance"
+    ).textContent =
+        average + "%";
+
+
+
+    renderStudents();
+
+
+
+    renderSummary();
+
+}
+
+
+
+function renderStudents(){
+
+
+    const table =
+        document.getElementById(
+            "reportTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+
+    if(students.length === 0){
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        text-align:center;
+                        padding:30px;
+                    "
+                >
+
+                    No student records found
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+
+    students.forEach(
+        student => {
+
+
+            const percentage =
+                Number(
+                    student.attendance_percentage || 0
+                );
+
+
+            let status =
+                "Good";
+
+            let statusClass =
+                "good";
+
+
+            if(percentage < 75){
+
+                status =
+                    "Low";
+
+                statusClass =
+                    "danger";
+
+            }
+            else if(percentage < 85){
+
+                status =
+                    "Average";
+
+                statusClass =
+                    "warning";
+
+            }
+
+
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${student.id}
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+                            ${student.name}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+                        ${student.class_name || "-"}
+                    </td>
+
+
+                    <td>
+                        ${student.section || "-"}
+                    </td>
+
+
+                    <td>
+
+                        <div style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                        ">
+
+                            <div class="progress">
+
+                                <div
+                                    class="progress-bar"
+                                    style="
+                                        width:${percentage}%;
+                                    "
+                                ></div>
+
+                            </div>
+
+                            <strong>
+                                ${percentage}%
+                            </strong>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="${statusClass}"
+                        >
+
+                            ${status}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+}
+
+
+
+function renderSummary(){
+
+
+    const summary =
+        document.getElementById(
+            "summary"
+        );
+
+
+    if(students.length === 0){
+
+        summary.innerHTML =
+            "No data available.";
+
+        return;
+
+    }
+
+
+
+    let high = 0;
+
+    let medium = 0;
+
+    let low = 0;
+
+
+
+    students.forEach(
+        student => {
+
+            const percentage =
+                Number(
+                    student.attendance_percentage || 0
+                );
+
+
+            if(percentage >= 85){
+
+                high++;
+
+            }
+            else if(percentage >= 75){
+
+                medium++;
+
+            }
+            else{
+
+                low++;
+
+            }
+
+        }
+    );
+
+
+
+    summary.innerHTML = `
+
+        <div style="
+            display:grid;
+            grid-template-columns:
+                repeat(3,minmax(0,1fr));
+            gap:20px;
+        ">
+
+
+            <div style="
+                padding:20px;
+                background:#dcfce7;
+                border-radius:10px;
+            ">
+
+                <strong>
+                    Good Attendance
+                </strong>
+
+                <h2
+                    style="margin-top:8px;color:#166534"
+                >
+                    ${high}
+                </h2>
+
+                <p>
+                    Students with 85% or above
+                </p>
+
+            </div>
+
+
+
+            <div style="
+                padding:20px;
+                background:#fef9c3;
+                border-radius:10px;
+            ">
+
+                <strong>
+                    Average Attendance
+                </strong>
+
+                <h2
+                    style="margin-top:8px;color:#a16207"
+                >
+                    ${medium}
+                </h2>
+
+                <p>
+                    Students between 75% and 84%
+                </p>
+
+            </div>
+
+
+
+            <div style="
+                padding:20px;
+                background:#fee2e2;
+                border-radius:10px;
+            ">
+
+                <strong>
+                    Low Attendance
+                </strong>
+
+                <h2
+                    style="margin-top:8px;color:#991b1b"
+                >
+                    ${low}
+                </h2>
+
+                <p>
+                    Students below 75%
+                </p>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}
+
+
+
+loadData();
+
+
+</script>
+
+
+</body>
+
+</html>
